@@ -75,9 +75,5 @@ module GP
     def to_s
       @root.to_s
     end
-
-    def inspect
-      @root.inspect
-    end
   end
 end

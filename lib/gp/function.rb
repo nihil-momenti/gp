@@ -1,11 +1,12 @@
 module GP
   class Function
-    attr_reader :name, :type, :arg_types
+    attr_reader :name, :arg_types, :type, :code
 
-    def initialize name, args
+    def initialize name, arg_types, type, code
       @name = name
-      @type = args[:type]
-      @arg_types = args[:args]
+      @arg_types = arg_types
+      @type = type
+      @code = code
       
       @klass = Class.new do
         attr_reader :args
@@ -17,17 +18,28 @@ module GP
 
       @klass.class_eval <<-END
         def to_s
-          #{ args[:code] }
+          #{ code.gsub(/\{(\d*)\}/, '#{args[\1]}').inspect }
         end
 
         def inspect
-          "#{ @type } <- #{ @name }(#{ @arg_types.join ', ' })\n{\n\#{ @args.map(&:inspect).join ",\n"}\n}"
+          #{ code.gsub(/\{(\d*)\}/, '#{args[\1]}').inspect }
         end
       END
     end
 
     def new *args
       @klass.new *args
+    end
+
+    def to_s
+      <<-END
+#{ name }: #{ arg_types * ', ' } -> #{ type }
+ => #{ code }
+      END
+    end
+
+    def inspect
+      "#<GP::Function:0x2660:[#{ name }:#{ arg_types * ',' }->#{ type }=>#{ code }]>"
     end
   end
 end
