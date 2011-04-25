@@ -1,8 +1,9 @@
+---
 constants:
   Number:
-    new => (rand)
+    (rand)
   Boolean:
-    new => (rand > 0.5)
+    (rand > 0.5)
 
 
 variables:

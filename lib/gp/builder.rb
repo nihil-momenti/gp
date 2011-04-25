@@ -13,13 +13,42 @@ module GP
 
   FORMULA_REGEX = /#{name}#{name_sep}#{args}#{type_sep}#{type}#{code_sep}#{code}/
 
-  class << self
+  class Builder
+    class << self
+      private :new
+
+      def build &blk
+        return new(&blk).build
+      end
+    end
+        
+    def initialize &blk
+      @functions = []
+      @constants = {}
+      @variables = {}
+
+      instance_exec &blk
+    end
+
+    def build
+      return Population.new @size, @functions, @constants, @variables, @return_type
+    end
+
+    def size value
+      @size = value
+    end
+
+    def return_type value
+      @return_type = value
+    end
+
     def parse_file file
       yaml = YAML.parse_file file
-      functions = parse_functions yaml['functions']
-      constants = parse_constants yaml['constants']
-      variables = parse_variables yaml['variables']
+      @functions += parse_functions yaml['functions'].value
+      @constants.merge! parse_constants yaml['constants'].value
+      @variables.merge! parse_variables yaml['variables'].value
     end
+    private :parse_file
 
     def parse_functions s
       s.scan(FORMULA_REGEX).map do |name, args, type, code|
@@ -29,13 +58,16 @@ module GP
         Function.new name, args, type, code
       end
     end
+    private :parse_functions
 
     def parse_constants h
-      Hash[ h.map { |k, v| [k.to_sym, eval "proc { #{v} }"] } ]
+      Hash[ h.map { |k, v| [k.value.to_sym, eval("proc { #{v.value} }")] } ]
     end
+    private :parse_constants
 
     def parse_variables h
-      Hash[ h.map { |k, v| [k, v.to_sym] } ]
+      Hash[ h.map { |k, v| [k.value, v.value.to_sym] } ]
     end
+    private :parse_variables
   end
 end

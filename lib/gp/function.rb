@@ -18,11 +18,11 @@ module GP
 
       @klass.class_eval <<-END
         def to_s
-          #{ code.gsub(/\{(\d*)\}/, '#{args[\1]}').inspect }
+          #{ code.inspect.gsub(/\{(\d*)\}/, '#{ args[\1] }') }
         end
 
         def inspect
-          #{ code.gsub(/\{(\d*)\}/, '#{args[\1]}').inspect }
+          #{ code.inspect.gsub(/\{(\d*)\}/, '#{ args[\1] }') }
         end
       END
     end
@@ -39,7 +39,7 @@ module GP
     end
 
     def inspect
-      "#<GP::Function:0x2660:[#{ name }:#{ arg_types * ',' }->#{ type }=>#{ code }]>"
+      "#<GP::Function:[#{ name }:#{ arg_types * ',' }->#{ type }=>#{ code }]>"
     end
   end
 end

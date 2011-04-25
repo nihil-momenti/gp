@@ -13,10 +13,18 @@ module GP
       when :full
         @root = __full__ depth, return_type
       end
+
+      eval <<-END
+        class << self
+          def call vars
+            #{ @root.to_s }
+          end
+        end
+      END
     end
 
     def variables type=nil
-      if type
+      if type != nil
         @variables.select{ |key, val| val == type }.map(&:first)
       else
         @variables
@@ -24,19 +32,15 @@ module GP
     end
 
     def functions type=nil
-      if type
+      if type != nil
         @functions.select{ |func| func.type == type }
       else
         @functions
       end
     end
 
-    def constants type=nil
-      if type
-        @constants[type]
-      else
-        @constants
-      end
+    def constants
+      @constants
     end
 
     def __grow__ depth, type
@@ -46,9 +50,9 @@ module GP
       if depth == 0 or rand < terminal_count / (terminal_count + function_count)
         var_num = terminal_count - 1
         if rand < (1.0 / (var_num + 1))
-          @constants[type].call
+          constants[type].call
         else
-          variables(type).shuffle.first
+          "vars[:#{variables(type).shuffle.first}]"
         end
       else
         func = functions(type).shuffle.pop
@@ -61,7 +65,7 @@ module GP
       if depth == 0
         var_num = variables(type).length
         if rand < (1.0 / (var_num + 1))
-          @constants[type].call
+          constants[type].call
         else
           variables(type).shuffle.first
         end
