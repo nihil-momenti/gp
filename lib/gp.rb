@@ -1,6 +1,10 @@
 dir = File.join File.dirname(__FILE__), 'gp'
+$:.unshift File.expand_path File.dirname(__FILE__)
 
 %w{
+  node
+  constant
+  variable
   function
   algorithm
   population

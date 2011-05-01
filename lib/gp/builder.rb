@@ -46,6 +46,7 @@ module GP
       yaml = YAML.parse_file file
       @functions += parse_functions yaml['functions'].value
       @constants.merge! parse_constants yaml['constants'].value
+      puts @constants
       @variables.merge! parse_variables yaml['variables'].value
     end
     private :parse_file
@@ -55,7 +56,13 @@ module GP
         name = name.to_sym
         args = args.scan(/\w+/).map(&:to_sym)
         type = type.to_sym
-        Function.new name, args, type, code
+        
+        Class.new(Function) do
+          @name = name
+          @arg_types = args
+          @type = type
+          @code = code
+        end
       end
     end
     private :parse_functions

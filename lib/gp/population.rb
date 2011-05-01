@@ -11,5 +11,8 @@ module GP
         end
       end
     end
+
+    def succ
+    end
   end
 end

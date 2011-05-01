@@ -12,6 +12,8 @@ module GP
         @root = __grow__ depth, return_type
       when :full
         @root = __full__ depth, return_type
+      else
+        @root = depth
       end
 
       eval <<-END
@@ -47,15 +49,15 @@ module GP
       terminal_count = variables(type).length + 1
       function_count = functions(type).length
 
-      if depth == 0 or rand < terminal_count / (terminal_count + function_count)
-        var_num = terminal_count - 1
-        if rand < (1.0 / (var_num + 1))
+      if depth == 0 or rand < terminal_count / (terminal_count + function_count).to_f
+        if rand < (1.0 / terminal_count)
           constants[type].call
         else
-          "vars[:#{variables(type).shuffle.first}]"
+          "vars[:#{variables(type).choice}]"
         end
       else
-        func = functions(type).shuffle.pop
+        func = functions(type).choice
+        raise RuntimeError, "no functions with return type [#{type}]" if func == nil
         func.new func.arg_types.map { |type| __grow__ depth - 1, type }
       end
     end
@@ -67,17 +69,39 @@ module GP
         if rand < (1.0 / (var_num + 1))
           constants[type].call
         else
-          variables(type).shuffle.first
+          "vars[:#{variables(type).choice}]"
         end
       else
-        func = functions(type).shuffle.pop
-        func.new func.arg_types.map { |type| __grow__ depth - 1, type }
+        func = functions(type).choice
+        raise RuntimeError, "no functions with return type [#{type}]" if func == nil
+        func.new func.arg_types.map { |type| __full__ depth - 1, type }
       end
     end
     private :__full__
 
+    def inspect
+      @root.inspect
+    end
+
     def to_s
       @root.to_s
+    end
+
+    def random_node
+      node = @root
+      while rand > 0.5 && node.has_children
+        node = node.random_child
+      end
+    end
+
+    def cross other
+      last = @root
+      node = last.random_child
+      while rand > 0.5 && node.has_children
+        last = node
+        node = node.random_child
+      end
+      last.replace(node, other.random_node)
     end
   end
 end
