@@ -4,6 +4,10 @@ module GP
       @children = []
     end
 
+    def replace old_node, new_node
+      @children[@children.index old_node] = new_node
+    end
+
     def random_child
       @children.choice
     end

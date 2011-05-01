@@ -31,7 +31,21 @@ module GP
     end
 
     def build
-      return Population.new @size, @functions, @constants, @variables, @return_type
+      size = @size
+      functions = @functions
+      constants = @constants
+      variables = @variables
+      return_type = @return_type
+      fitness_function = @fitness_function
+
+      return Class.new(Population) do
+        @size = size
+        @functions = functions
+        @constants = constants
+        @variables = variables
+        @return_type = return_type
+        @fitness_function = fitness_function
+      end.new
     end
 
     def size value
@@ -42,11 +56,14 @@ module GP
       @return_type = value
     end
 
+    def fitness_function &blk
+      @fitness_function = blk
+    end
+
     def parse_file file
       yaml = YAML.parse_file file
       @functions += parse_functions yaml['functions'].value
       @constants.merge! parse_constants yaml['constants'].value
-      puts @constants
       @variables.merge! parse_variables yaml['variables'].value
     end
     private :parse_file

@@ -1,12 +1,7 @@
 module GP
   class Algorithm
     attr_reader :functions, :constants, :variables, :return_type
-    def initialize functions, constants, variables, return_type, generation_type, depth
-      @functions = functions
-      @constants = constants
-      @variables = variables
-      @return_type = return_type
-
+    def initialize generation_type, depth
       case generation_type
       when :grow
         @root = __grow__ depth, return_type
@@ -27,22 +22,22 @@ module GP
 
     def variables type=nil
       if type != nil
-        @variables.select{ |key, val| val == type }.map(&:first)
+        self.class.variables.select{ |key, val| val == type }.map(&:first)
       else
-        @variables
+        self.class.variables
       end
     end
 
     def functions type=nil
       if type != nil
-        @functions.select{ |func| func.type == type }
+        self.class.functions.select{ |func| func.type == type }
       else
-        @functions
+        self.class.functions
       end
     end
 
     def constants
-      @constants
+      self.class.constants
     end
 
     def __grow__ depth, type
@@ -51,9 +46,9 @@ module GP
 
       if depth == 0 or rand < terminal_count / (terminal_count + function_count).to_f
         if rand < (1.0 / terminal_count)
-          constants[type].call
+          Constant.new constants[type].call
         else
-          "vars[:#{variables(type).choice}]"
+          Variable.new "vars[:#{variables(type).choice}]"
         end
       else
         func = functions(type).choice
@@ -67,9 +62,9 @@ module GP
       if depth == 0
         var_num = variables(type).length
         if rand < (1.0 / (var_num + 1))
-          constants[type].call
+          Constant.new constants[type].call
         else
-          "vars[:#{variables(type).choice}]"
+          Variable.new "vars[:#{variables(type).choice}]"
         end
       else
         func = functions(type).choice
@@ -92,16 +87,23 @@ module GP
       while rand > 0.5 && node.has_children
         node = node.random_child
       end
+      node
     end
 
     def cross other
-      last = @root
+      new_root = @root.dup
+      last = new_root
       node = last.random_child
       while rand > 0.5 && node.has_children
         last = node
         node = node.random_child
       end
       last.replace(node, other.random_node)
+      self.class.new nil, new_root
+    end
+
+    class << self
+      attr_reader :functions, :constants, :variables, :return_type
     end
   end
 end

@@ -14,6 +14,10 @@ module GP
       @code ||= self.class.code.gsub(/\{\d*\}/) { |s| @children[s.delete('{}').to_i].to_s }
     end
 
+    def dup
+      self.class.new @children.map { |child| child.dup }
+    end
+
     class << self
       attr_reader :name, :arg_types, :type, :code
 
