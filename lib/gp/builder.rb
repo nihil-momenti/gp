@@ -26,8 +26,8 @@ module GP
 
     def initialize &blk
       @functions = []
-      @aconstants = {}
-      @variables = Hash.new { |hash, key| hash[key] = [] }
+      @aconstants = []
+      @variables = []
 
       @pop_size = 100_000
       @min_depth = 2
@@ -61,10 +61,8 @@ module GP
     def parse_file file
       yaml = YAML.parse_file file
       @functions += parse_functions yaml['functions'].value
-      @aconstants.merge! parse_constants yaml['constants'].value
-      parse_variables(yaml['variables'].value).each do |key, value|
-        @variables[key] += value
-      end
+      @aconstants += parse_constants yaml['constants'].value
+      @variables += parse_variables yaml['variables'].value
     end
     private :parse_file
 
@@ -77,7 +75,7 @@ module GP
         Class.new(Function) do
           @name = name
           @arg_types = args
-          @type = type
+          @rtype = type
           @code = code
         end
       end
@@ -85,14 +83,19 @@ module GP
     private :parse_functions
 
     def parse_constants h
-      Hash[ h.map { |k, v| [k.value.to_sym, eval("proc { #{v.value} }")] } ]
+      h.map do |k, v| 
+        Class.new(Constant) do
+          @proc = eval("Proc.new { #{v.value} }")
+          @rtype = k.value.to_sym
+        end
+      end
     end
     private :parse_constants
 
     def parse_variables h
-      hash = Hash.new { |hash, key| hash[key] = [] }
-      h.each { |k, v| hash[v.value.to_sym] << k.value }
-      hash
+      h.map do |k, v|
+        Variable.new "vars[:#{k.value}]", v.value.to_sym
+      end
     end
     private :parse_variables
 

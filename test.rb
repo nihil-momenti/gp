@@ -16,9 +16,9 @@ examples = {
 POP = GP::Builder.build do
   parse_file 'definitions.gp'
 
-  pop_size 64
+  pop_size 1000
   min_depth 2
-  max_depth 8
+  max_depth 16
   step_size 2
   return_type :Number
 

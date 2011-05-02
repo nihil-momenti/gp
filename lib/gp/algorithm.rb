@@ -21,30 +21,38 @@ module GP
     end
 
     def variables type=nil
-      environment.variables
+      if type != nil
+        environment.variables.select{ |var| var.rtype == type }
+      else
+        environment.variables
+      end
     end
 
     def functions type=nil
       if type != nil
-        environment.functions.select{ |func| func.type == type }
+        environment.functions.select{ |func| func.rtype == type }
       else
         environment.functions
       end
     end
 
-    def aconstants
-      environment.aconstants
+    def aconstants type=nil
+      if type != nil
+        environment.aconstants.select{ |const| const.rtype == type }
+      else
+        environment.aconstants
+      end
     end
 
     def __grow__ depth, type
-      terminal_count = variables[type].length + 1
+      terminal_count = variables(type).length + 1
       function_count = functions(type).length
 
       if depth == 0 or rand < terminal_count / (terminal_count + function_count).to_f
         if rand < (1.0 / terminal_count)
-          Constant.new aconstants[type].call
+          aconstants(type).choice.new
         else
-          Variable.new "vars[:#{variables[type].choice}]"
+          variables(type).choice
         end
       else
         func = functions(type).choice
@@ -56,11 +64,11 @@ module GP
 
     def __full__ depth, type
       if depth == 0
-        var_num = variables[type].length
+        var_num = variables(type).length
         if rand < (1.0 / (var_num + 1))
-          Constant.new aconstants[type].call
+          aconstants(type).choice.new
         else
-          Variable.new "vars[:#{variables[type].choice}]"
+          variables(type).choice
         end
       else
         func = functions(type).choice
@@ -78,24 +86,26 @@ module GP
       @root.to_s
     end
 
-    def random_node
-      node = @root
-      while rand > 0.5 && node.has_children
-        node = node.random_child
-      end
-      node
+    def random_node type
+      @root.traverse.select { |node| node.rtype == type }.choice
     end
 
     def cross other
-      new_root = @root.dup
-      last = new_root
-      node = last.random_child
-      while rand > 0.5 && node.has_children
-        last = node
-        node = node.random_child
+      replacement = nil
+      while replacement == nil
+        to_replace = @root.traverse.choice
+        replacement = other.random_node to_replace.rtype
       end
-      last.replace(node, other.random_node)
-      self.class.new nil, new_root
+      self.class.new nil, @root.dup_with_replacement(to_replace, replacement)
+    end
+
+    def score &fitness_function
+      if @fitness_function == fitness_function
+        @score
+      else
+        @fitness_function = fitness_function
+        @score = fitness_function.call(self)
+      end
     end
 
     class << self

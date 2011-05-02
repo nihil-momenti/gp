@@ -20,29 +20,30 @@ module GP
       @pop.map do |algo|
         puts '-----'
         puts algo
-        puts environment.fitness_function.call(algo)
+        puts algo.score(&environment.fitness_function)
         puts
       end
     end
 
     def average_score
       @pop.reduce(0) do |sum, algo|
-        sum += environment.fitness_function.call(algo)
+        sum += algo.score(&environment.fitness_function)
       end / @pop.length
     end
 
     def highest_score
       @pop.reduce(1000) do |sum, algo|
-        sum = [sum, environment.fitness_function.call(algo)].min
+        sum = [sum, algo.score(&environment.fitness_function)].min
       end
     end
 
     def tourney
-      (environment.size**0.5).to_i.times.map { @pop.choice }.map { |algo| [environment.fitness_function.call(algo), algo] }.sort_by(&:first)
+      (environment.pop_size**0.5).to_i.times.map { @pop.choice }.map { |algo| [algo.score(&environment.fitness_function), algo] }.sort_by(&:first)
     end
 
     def succ
-      @pop = (@pop.length).times.map { a,b = tourney.pop 2 ; a.last.cross b.last }
+      @pop = (@pop.length).times.map { a,b = tourney ; a.last.cross b.last }
+      self
     end
   end
 end
