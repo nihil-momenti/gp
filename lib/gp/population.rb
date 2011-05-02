@@ -10,8 +10,6 @@ module GP
       variables = self.class.variables
       return_type = self.class.return_type
 
-      puts functions, constants, variables, return_type
-
       a = Class.new(Algorithm) do
         @functions = functions
         @constants = constants
