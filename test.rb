@@ -14,19 +14,23 @@ examples = {
 }
 
 POP = GP::Builder.build do
-  size 64
-  return_type :Number
   parse_file 'definitions.gp'
-  fitness_function do |algo|
-    examples.map do |test, result|
-      (algo.call(test) - result).abs
-    end.reduce(&:+)
-  end
+
+  pop_size 64
+  min_depth 2
+  max_depth 8
+  step_size 2
+  return_type :Number
+
+  fitness_function(proc do |algo|
+    begin
+      examples.map do |test, result|
+        (algo.call(test) - result).abs
+      end.reduce(&:+)
+    rescue
+      1000
+    end
+  end)
 end
-
-A = POP.instance_variable_get(:@pop).choice
-B = POP.instance_variable_get(:@pop).choice
-C = A.cross B
-
 
 IRB.start(__FILE__)

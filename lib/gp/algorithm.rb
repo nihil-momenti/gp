@@ -1,12 +1,12 @@
 module GP
   class Algorithm
-    attr_reader :functions, :constants, :variables, :return_type
+    attr_reader :functions, :aconstants, :variables, :return_type
     def initialize generation_type, depth
       case generation_type
       when :grow
-        @root = __grow__ depth, return_type
+        @root = __grow__ depth, environment.return_type
       when :full
-        @root = __full__ depth, return_type
+        @root = __full__ depth, environment.return_type
       else
         @root = depth
       end
@@ -21,34 +21,30 @@ module GP
     end
 
     def variables type=nil
-      if type != nil
-        self.class.variables.select{ |key, val| val == type }.map(&:first)
-      else
-        self.class.variables
-      end
+      environment.variables
     end
 
     def functions type=nil
       if type != nil
-        self.class.functions.select{ |func| func.type == type }
+        environment.functions.select{ |func| func.type == type }
       else
-        self.class.functions
+        environment.functions
       end
     end
 
-    def constants
-      self.class.constants
+    def aconstants
+      environment.aconstants
     end
 
     def __grow__ depth, type
-      terminal_count = variables(type).length + 1
+      terminal_count = variables[type].length + 1
       function_count = functions(type).length
 
       if depth == 0 or rand < terminal_count / (terminal_count + function_count).to_f
         if rand < (1.0 / terminal_count)
-          Constant.new constants[type].call
+          Constant.new aconstants[type].call
         else
-          Variable.new "vars[:#{variables(type).choice}]"
+          Variable.new "vars[:#{variables[type].choice}]"
         end
       else
         func = functions(type).choice
@@ -60,11 +56,11 @@ module GP
 
     def __full__ depth, type
       if depth == 0
-        var_num = variables(type).length
+        var_num = variables[type].length
         if rand < (1.0 / (var_num + 1))
-          Constant.new constants[type].call
+          Constant.new aconstants[type].call
         else
-          Variable.new "vars[:#{variables(type).choice}]"
+          Variable.new "vars[:#{variables[type].choice}]"
         end
       else
         func = functions(type).choice
@@ -103,7 +99,7 @@ module GP
     end
 
     class << self
-      attr_reader :functions, :constants, :variables, :return_type
+      attr_reader :functions, :aconstants, :variables, :return_type
     end
   end
 end

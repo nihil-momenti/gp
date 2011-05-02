@@ -14,57 +14,57 @@ module GP
   FORMULA_REGEX = /#{name}#{name_sep}#{args}#{type_sep}#{type}#{code_sep}#{code}/
 
   class Builder
-    class << self
-      private :new
-
-      def build &blk
-        return new(&blk).build
-      end
+    %w{
+      pop_size max_depth min_depth step_size return_type fitness_function
+    }.each do |attr|
+      eval <<-END
+        def #{attr.to_s} value
+          @#{attr.to_s} = value
+        end
+      END
     end
-        
+
     def initialize &blk
       @functions = []
-      @constants = {}
-      @variables = {}
+      @aconstants = {}
+      @variables = Hash.new { |hash, key| hash[key] = [] }
+
+      @pop_size = 100_000
+      @min_depth = 2
+      @max_depth = 8
+      @step_size = 2
 
       instance_exec &blk
     end
 
     def build
-      size = @size
-      functions = @functions
-      constants = @constants
-      variables = @variables
-      return_type = @return_type
-      fitness_function = @fitness_function
+      if @return_type == nil or @fitness_function == nil
+        raise ArgumentError, "return_type and fitness_function required" 
+      end
 
-      return Class.new(Population) do
-        @size = size
-        @functions = functions
-        @constants = constants
-        @variables = variables
-        @return_type = return_type
-        @fitness_function = fitness_function
-      end.new
-    end
+      environment = Environment.new(
+        :functions => @functions,
+        :aconstants => @aconstants,
+        :variables => @variables,
 
-    def size value
-      @size = value
-    end
+        :pop_size => @pop_size,
+        :min_depth => @min_depth,
+        :max_depth => @max_depth,
 
-    def return_type value
-      @return_type = value
-    end
+        :return_type => @return_type,
+        :fitness_function => @fitness_function
+      )
 
-    def fitness_function &blk
-      @fitness_function = blk
+      return Class.new(Population) { define_method(:environment) { environment } }.new
     end
 
     def parse_file file
       yaml = YAML.parse_file file
       @functions += parse_functions yaml['functions'].value
-      @constants.merge! parse_constants yaml['constants'].value
-      @variables.merge! parse_variables yaml['variables'].value
+      @aconstants.merge! parse_constants yaml['constants'].value
+      parse_variables(yaml['variables'].value).each do |key, value|
+        @variables[key] += value
+      end
     end
     private :parse_file
 
@@ -90,8 +90,17 @@ module GP
     private :parse_constants
 
     def parse_variables h
-      Hash[ h.map { |k, v| [k.value, v.value.to_sym] } ]
+      hash = Hash.new { |hash, key| hash[key] = [] }
+      h.each { |k, v| hash[v.value.to_sym] << k.value }
+      hash
     end
     private :parse_variables
+
+    class << self
+      private :new
+      def build &blk
+        return new(&blk).build
+      end
+    end
   end
 end
