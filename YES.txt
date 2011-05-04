@@ -1,0 +1,18 @@
+→ ruby test.rb                                                                                                                                        ⟡-(git : master)-⟡ 
+rbx-head :001 > puts POP.average_score, POP.highest_score
+21004.72652484698
+29.962704071066348
+ => nil 
+rbx-head :002 > POP.succ ; puts POP.average_score, POP.highest_score
+91.3039968813819
+27.43990660376715
+ => nil 
+rbx-head :003 > POP.succ ; puts POP.average_score, POP.highest_score
+88.87462312184684
+20.794175062143548
+ => nil 
+rbx-head :004 > POP.succ ; puts POP.average_score, POP.highest_score
+WINNER: ((vars[:x] * vars[:x]) + (vars[:y] * vars[:y]))
+90.35823401822086
+0.0
+ => nil 

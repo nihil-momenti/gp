@@ -16,8 +16,12 @@ module GP
       self.class.new @value, @rtype
     end
 
-    def dup_with_replacement *args
-      self.class.new @value, @rtype
+    def dup_with_replacement to_replace, replacement
+      if self == to_replace
+        replacement.dup
+      else
+        self.class.new @value, @rtype
+      end
     end
   end
 end

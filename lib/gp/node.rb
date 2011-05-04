@@ -6,8 +6,10 @@ module GP
       @children = children
     end
 
-    def traverse
-      @children.map { |child| child.traverse }.flatten << self
+    def traverse nodes=[], leaves=[]
+      (has_children? ? nodes : leaves) << self
+      @children.each { |child| child.traverse nodes, leaves }
+      return nodes, leaves
     end
 
     def max_height
@@ -31,14 +33,10 @@ module GP
     end
 
     def dup_with_replacement to_replace, replacement
-      if @children.include? to_replace
-        self.class.new @children.map do |child|
-          child == to_replace ? replacement.dup : child.dup
-        end
+      if self == to_replace
+        replacement.dup
       else
-        self.class.new @children.map do |child|
-          child.dup_with_replacement to_replace, replacement
-        end
+        self.class.new @children.map { |child| child.dup_with_replacement to_replace, replacement }
       end
     end
 
@@ -46,7 +44,7 @@ module GP
       @children.choice
     end
 
-    def has_children
+    def has_children?
       @children.any?
     end
   end

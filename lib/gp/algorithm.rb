@@ -86,26 +86,33 @@ module GP
       @root.to_s
     end
 
-    def random_node type
-      @root.traverse.select { |node| node.rtype == type }.choice
+    def random_node type=nil
+      if rand < 0.9 and @root.has_children?
+        nodes, ignore = @root.traverse
+      else
+        ignore, nodes = @root.traverse
+      end
+
+      if type == nil
+        nodes.choice
+      else
+        nodes.select { |node| node.rtype == type }.choice
+      end
     end
 
     def cross other
       replacement = nil
       while replacement == nil
-        to_replace = @root.traverse.choice
-        replacement = other.random_node to_replace.rtype
+        to_replace = random_node
+        replacement = other.random_node(to_replace.rtype)
       end
-      self.class.new nil, @root.dup_with_replacement(to_replace, replacement)
+      self.class.new(nil, @root.dup_with_replacement(to_replace, replacement))
     end
 
-    def score &fitness_function
-      if @fitness_function == fitness_function
-        @score
-      else
-        @fitness_function = fitness_function
-        @score = fitness_function.call(self)
-      end
+
+
+    def score
+      @score ||= environment.fitness_function.call(self)
     end
 
     class << self

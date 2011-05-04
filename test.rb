@@ -1,18 +1,6 @@
 require './lib/gp'
 require 'irb'
 
-examples = {
-  {:x => 0.0, :y => 0.0} => 0.0,
-  {:x => 1.0, :y => 0.0} => 1.0,
-  {:x => 2.0, :y => 0.0} => 2.0,
-  {:x => 0.0, :y => 1.0} => 1.0,
-  {:x => 1.0, :y => 1.0} => 1.414,
-  {:x => 2.0, :y => 1.0} => 2.236,
-  {:x => 0.0, :y => 2.0} => 2.0,
-  {:x => 1.0, :y => 2.0} => 2.236,
-  {:x => 2.0, :y => 2.0} => 2.828
-}
-
 POP = GP::Builder.build do
   parse_file 'definitions.gp'
 
@@ -22,15 +10,20 @@ POP = GP::Builder.build do
   step_size 2
   return_type :Number
 
-  fitness_function(proc do |algo|
+  fitness_function proc { |algo|
     begin
-      examples.map do |test, result|
-        (algo.call(test) - result).abs
+      10.times.map do |x|
+        10.times.map do |y|
+          vars = { :x => x, :y => y }
+          result = (x*x + y*y).to_f
+          (algo.call(vars) - result).abs / (result == 0 ? 1.0 : result)
+        end.reduce(&:+)
       end.reduce(&:+)
     rescue
+      puts $!
       1000
     end
-  end)
+  }
 end
 
 IRB.start(__FILE__)
