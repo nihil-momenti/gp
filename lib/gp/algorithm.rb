@@ -1,6 +1,6 @@
 module GP
   class Algorithm
-    attr_reader :functions, :aconstants, :variables, :return_type
+    attr_reader :functions, :aconstants, :variables, :return_type, :root
     def initialize generation_type, depth
       case generation_type
       when :grow
@@ -109,7 +109,15 @@ module GP
       self.class.new(nil, @root.dup_with_replacement(to_replace, replacement))
     end
 
+    def mutate
+      to_replace = random_node
+      replacement = self.class.new(:grow, to_replace.max_height).root
+      self.class.new(nil, @root.dup_with_replacement(to_replace, replacement))
+    end
 
+    def simplify
+      self.class.new(nil, @root.simplify)
+    end
 
     def score
       @score ||= environment.fitness_function.call(self)

@@ -15,6 +15,18 @@ module GP
       @code ||= self.class.code.gsub(/\{\d*\}/) { |s| @children[s.delete('{}').to_i].to_s }
     end
 
+    def constant?
+      @children.all? { |child| child.constant? }
+    end
+
+    def simplify
+      if constant?
+        Constant.new(eval(self.to_s), self.rtype)
+      else
+        self.class.new @children.map { |child| child.simplify }
+      end
+    end
+
     class << self
       attr_reader :name, :arg_types, :rtype, :code
 

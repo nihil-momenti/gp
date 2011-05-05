@@ -32,6 +32,12 @@ module GP
       @pop_size = 100_000
       @min_depth = 2
       @max_depth = 8
+
+      @crossover_rate = 0.9
+      @mutation_rate = 0.02
+      @reproduction_rate = 0.04
+      @simplification_rate = 0.04
+
       @step_size = 2
 
       instance_exec &blk
@@ -50,6 +56,11 @@ module GP
         :pop_size => @pop_size,
         :min_depth => @min_depth,
         :max_depth => @max_depth,
+
+        :crossover_rate => @crossover_rate,
+        :mutation_rate => @mutation_rate,
+        :reproduction_rate => @reproduction_rate,
+        :simplification_rate => @simplification_rate,
 
         :return_type => @return_type,
         :fitness_function => @fitness_function

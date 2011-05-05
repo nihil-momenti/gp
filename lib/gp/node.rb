@@ -28,6 +28,10 @@ module GP
       end
     end
 
+    def simplify
+      dup
+    end
+
     def dup
       self.class.new @children.map { |child| child.dup }
     end

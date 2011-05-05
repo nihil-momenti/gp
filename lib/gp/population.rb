@@ -32,11 +32,12 @@ module GP
     end
 
     def highest_score
-      @pop.reduce(1000) do |sum, algo|
-        if algo.score == 0
-          puts "WINNER: #{algo}"
+      @pop.reduce([nil,1000]) do |sum, algo|
+        if sum.last > algo.score
+          sum = [algo, algo.score]
+        else
+          sum
         end
-        sum = [sum, algo.score].min
       end
     end
 
@@ -46,7 +47,12 @@ module GP
     end
 
     def succ
-      @pop = (@pop.length).times.map { a,b = tourney ; a.cross b }
+      new_pop = []
+      (@pop.length * environment.crossover_rate).to_i.times { a,b = tourney ; new_pop << a.cross(b) }
+      (@pop.length * environment.mutation_rate).to_i.times { a = tourney.first ; new_pop << a.mutate }
+      (@pop.length * environment.reproduction_rate).to_i.times { a = tourney.first ; new_pop << a }
+      (@pop.length * environment.simplification_rate).to_i.times { a = tourney.first ; new_pop << a.simplify }
+      @pop = new_pop
       self
     end
   end

@@ -8,6 +8,10 @@ module GP
       @rtype = rtype
     end
 
+    def constant?
+      false
+    end
+
     def to_s
       @value.to_s
     end

@@ -2,10 +2,14 @@ require 'gp/node'
 
 module GP
   class Constant < Node
-    def initialize value=nil
+    def initialize value=nil, rtype=nil
       super()
-      @value = value || self.class.proc.call
-      @rtype = self.class.rtype
+      @value = value!=nil ? value : self.class.proc.call
+      @rtype = rtype || self.class.rtype
+    end
+
+    def constant?
+      true
     end
 
     def to_s
