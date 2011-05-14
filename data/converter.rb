@@ -1,4 +1,3 @@
-require 'ap'
 require 'yaml'
 
 soil_types = [
@@ -51,12 +50,22 @@ area_types = [
   :cache
 ]
 
-data = File.open('covtype.data') do |file|
+cover_types = [
+  :spruce,
+  :lodgepole_pine,
+  :ponderosa_pine,
+  :willow,
+  :aspen,
+  :douglas_fir,
+  :krummholz
+]
+
+data = File.open("covtype.data") do |file|
   file.each_line.map do |line|
     e,a,s,h,v,r,am,noon,pm,f,*rest,cover = *line.split(',')
     soil = soil_types[rest.pop(40).map(&:to_i).index(1)]
     area = area_types[rest.pop(4).map(&:to_i).index(1)]
-    cover = [:spruce, :lodgepole_pine, :ponderosa_pine, :willow, :aspen, :douglas_fir, :krummholz][cover.to_i+1]
+    cover = cover_types[cover.to_i+1]
     {
       :elevation => e.to_f,
       :aspect => a.to_f,
@@ -88,6 +97,49 @@ data.each do |datum|
   end
 end
 
-File.open('data.generated.yaml', 'w') do |file|
-  file.write(data.to_yaml)
+training = []
+validation = []
+test = []
+
+counts = Hash[cover_types.map { |type| [type, 0] }]
+
+data.each do |datum|
+  case counts[datum[:cover_type]]
+  when 0...1620
+    training << datum
+  when 1620...2160
+    validation << datum
+  else
+    test << datum
+  end
+end
+
+File.open("validation.set.rb", 'w') do |file|
+  file.write <<-END
+  module Assignment
+    module Data
+      Validation = #{validation.inspect}
+    end
+  end
+  END
+end
+
+File.open("training.set.rb", 'w') do |file|
+  file.write <<-END
+  module Assignment
+    module Data
+      Training = #{training.inspect}
+    end
+  end
+  END
+end
+
+File.open("test.set.rb", 'w') do |file|
+  file.write <<-END
+  module Assignment
+    module Data
+      Test = #{test.inspect}
+    end
+  end
+  END
 end
