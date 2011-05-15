@@ -62,10 +62,11 @@ cover_types = [
 
 data = File.open("covtype.data") do |file|
   file.each_line.map do |line|
-    e,a,s,h,v,r,am,noon,pm,f,*rest,cover = *line.split(',')
-    soil = soil_types[rest.pop(40).map(&:to_i).index(1)]
-    area = area_types[rest.pop(4).map(&:to_i).index(1)]
-    cover = cover_types[cover.to_i+1]
+    e,a,s,h,v,r,am,noon,pm,f,*re,c = *line.split(',')
+    soil = soil_types[re.pop(40).map(&:to_i).index(1)]
+    area = area_types[re.pop(4).map(&:to_i).index(1)]
+    cover = cover_types[c.to_i-1]
+    cover == nil ? p(c) : 0
     {
       :elevation => e.to_f,
       :aspect => a.to_f,
@@ -112,13 +113,14 @@ data.each do |datum|
   else
     test << datum
   end
+  counts[datum[:cover_type]] += 1 rescue (puts datum; raise)
 end
 
 File.open("validation.set.rb", 'w') do |file|
   file.write <<-END
   module Assignment
     module Data
-      Validation = #{validation.inspect}
+      Validation = Marshal.load(#{Marshal.dump(validation).inspect})
     end
   end
   END
@@ -128,7 +130,7 @@ File.open("training.set.rb", 'w') do |file|
   file.write <<-END
   module Assignment
     module Data
-      Training = #{training.inspect}
+      Training = Marshal.load(#{Marshal.dump(training).inspect})
     end
   end
   END
@@ -138,7 +140,7 @@ File.open("test.set.rb", 'w') do |file|
   file.write <<-END
   module Assignment
     module Data
-      Test = #{test.inspect}
+      Test = Marshal.load(#{Marshal.dump(test).inspect})
     end
   end
   END
