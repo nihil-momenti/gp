@@ -15,7 +15,8 @@ module GP
   code = /(\(.*\))/
 
   FORMULA_REGEX = /#{name}#{name_sep}#{args}#{type_sep}#{return_type}#{code_sep}#{code}/
-  TYPE_REGEX = type
+  NORMAL_TYPE_REGEX = normal_type
+  GENERIC_TYPE_REGEX = generic_type
 
   class Builder
     %w{
@@ -75,8 +76,8 @@ module GP
 
     def parse_file file
       yaml = YAML.parse_file file
-      @functions += parse_functions yaml['functions'].value
       @aconstants += parse_constants yaml['constants'].value
+      @functions += parse_functions yaml['functions'].value
       @variables += parse_variables yaml['variables'].value
     end
     private :parse_file
@@ -84,16 +85,17 @@ module GP
     def parse_functions s
       s.scan(FORMULA_REGEX).map do |name, args, type, code|
         name = name.to_sym
-        args = args.scan(TYPE_REGEX).map(&:to_sym)
+        normal_args = args.scan(NORMAL_TYPE_REGEX).map(&:to_sym)
+        generic_args = args.scan(GENERIC_TYPE_REGEX).map(&:to_sym)
         type = type.to_sym
         
         Class.new(Function) do
           @name = name
-          @arg_types = args
+          @arg_types = normal_args
           @rtype = type
           @code = code
         end
-      end
+      end.flatten
     end
     private :parse_functions
 
