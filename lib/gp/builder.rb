@@ -15,6 +15,7 @@ module GP
   code = /(\(.*\))/
 
   FORMULA_REGEX = /#{name}#{name_sep}#{args}#{type_sep}#{return_type}#{code_sep}#{code}/
+  TYPE_REGEX = type
   NORMAL_TYPE_REGEX = normal_type
   GENERIC_TYPE_REGEX = generic_type
 
@@ -82,18 +83,43 @@ module GP
     end
     private :parse_file
 
+    def replace_generic args
+      to_replace = args.first { |arg| GENERIC_TYPE_REGEX =~ arg }
+      deeper = args.any? { |arg| arg != to_replace and GENERIC_TYPE_REGEX =~ arg }
+      @aconstants.each do |replacement|
+        new_args = args.map{ |arg| arg == to_replace ? replacement : arg }
+        if deeper
+          replace_generic(new_args) do |new_new_args|
+            yield new_new_args
+          end
+        else
+          yield new_args
+        end
+      end
+    end
+
     def parse_functions s
       s.scan(FORMULA_REGEX).map do |name, args, type, code|
         name = name.to_sym
-        normal_args = args.scan(NORMAL_TYPE_REGEX).map(&:to_sym)
-        generic_args = args.scan(GENERIC_TYPE_REGEX).map(&:to_sym)
+        args = args.scan(TYPE_REGEX)
         type = type.to_sym
         
-        Class.new(Function) do
-          @name = name
-          @arg_types = normal_args
-          @rtype = type
-          @code = code
+        if args.any? { |arg| GENERIC_TYPE_REGEX =~ arg }
+          replace_generic(args).map do |new_args|
+            Class.new(Function) do
+              @name = name
+              @arg_types = args.map(&:to_sym)
+              @rtype = type
+              @code = code
+            end
+          end
+        else
+          Class.new(Function) do
+            @name = name
+            @arg_types = args.map(&:to_sym)
+            @rtype = type
+            @code = code
+          end
         end
       end.flatten
     end
