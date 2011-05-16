@@ -78,8 +78,8 @@ data = File.open("covtype.data") do |file|
       :hillshade_noon => noon.to_f,
       :hillshade_3pm => pm.to_f,
       :fire_horiz_dist => f.to_f,
-      :area_type => soil,
-      :soil_type => area,
+      :area_type => area,
+      :soil_type => soil,
       :cover_type => cover
     }
   end
