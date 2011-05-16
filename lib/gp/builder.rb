@@ -5,13 +5,17 @@ require File.join File.dirname(__FILE__), 'function'
 module GP
   name = /(\w+)/
   name_sep = /\s*:\s*/
-  args = /((?:\s*\w+\s*,\s*)*\s*\w+)/
+  normal_type = /[\w_]+/
+  generic_type = /<#{normal_type}>/
+  type = /#{normal_type}|#{generic_type}/
+  args = /((?:\s*#{type}\s*,\s*)*\s*#{type})/
   type_sep = /\s*->\s*/
-  type = /(\w+)/
+  return_type = /(#{type})/
   code_sep = /\s*=>\s*/
   code = /(\(.*\))/
 
-  FORMULA_REGEX = /#{name}#{name_sep}#{args}#{type_sep}#{type}#{code_sep}#{code}/
+  FORMULA_REGEX = /#{name}#{name_sep}#{args}#{type_sep}#{return_type}#{code_sep}#{code}/
+  TYPE_REGEX = type
 
   class Builder
     %w{
@@ -80,7 +84,7 @@ module GP
     def parse_functions s
       s.scan(FORMULA_REGEX).map do |name, args, type, code|
         name = name.to_sym
-        args = args.scan(/\w+/).map(&:to_sym)
+        args = args.scan(TYPE_REGEX).map(&:to_sym)
         type = type.to_sym
         
         Class.new(Function) do
