@@ -32,7 +32,7 @@ module GP
     end
 
     def highest_score
-      @pop.reduce([nil,1000]) do |sum, algo|
+      @pop.reduce([nil,100000]) do |sum, algo|
         if sum.last > algo.score
           sum = [algo, algo.score]
         else

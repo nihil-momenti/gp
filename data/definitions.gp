@@ -25,7 +25,6 @@ variables:
   fire_horiz_dist: Number
   area_type: AreaType
   soil_type: SoilType
-  cover_type: CoverType
 
 
 functions: |
@@ -53,8 +52,8 @@ functions: |
   NOT: Boolean -> Boolean
    => (not {0})
 
-  EQUAL: <X>, <X> -> <X>
+  EQUAL: <X>, <X> -> Boolean
    => ({0} == {1})
   
-  IF_NUM: Boolean, <X>, <X> -> <X>
+  IF: Boolean, <X>, <X> -> <X>
    => (if {0} then {1} else {2} end)

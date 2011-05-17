@@ -125,6 +125,10 @@ module GP
 
     class << self
       attr_reader :functions, :aconstants, :variables, :return_type
+
+      def inspect
+        "#<GP::Algorithm:[#{@variables.join(',')}->#{return_type}]>"
+      end
     end
   end
 end

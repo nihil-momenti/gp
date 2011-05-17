@@ -13,7 +13,7 @@ module GP
     end
 
     def to_s
-      @value.to_s
+      @value.inspect
     end
     
     def dup
@@ -30,6 +30,10 @@ module GP
 
     class << self
       attr_reader :proc, :rtype
+
+      def inspect
+        "#<GP::Constant:[#{@rtype}]>"
+      end
     end
   end
 end

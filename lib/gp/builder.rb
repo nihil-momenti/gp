@@ -84,10 +84,11 @@ module GP
     private :parse_file
 
     def replace_generic args
-      to_replace = args.first { |arg| GENERIC_TYPE_REGEX =~ arg }
-      deeper = args.any? { |arg| arg != to_replace and GENERIC_TYPE_REGEX =~ arg }
+      return enum_for(:replace_generic) unless block_given?
+      to_replace = args.select { |arg| GENERIC_TYPE_REGEX =~ arg }.first
+      deeper = args.any? { |arg| (arg != to_replace) and (GENERIC_TYPE_REGEX =~ arg) }
       @aconstants.each do |replacement|
-        new_args = args.map{ |arg| arg == to_replace ? replacement : arg }
+        new_args = args.map{ |arg| arg == to_replace ? replacement.rtype.to_s : arg }
         if deeper
           replace_generic(new_args) do |new_new_args|
             yield new_new_args
@@ -102,22 +103,25 @@ module GP
       s.scan(FORMULA_REGEX).map do |name, args, type, code|
         name = name.to_sym
         args = args.scan(TYPE_REGEX)
-        type = type.to_sym
+        type = type
         
         if args.any? { |arg| GENERIC_TYPE_REGEX =~ arg }
-          replace_generic(args).map do |new_args|
-            Class.new(Function) do
+          a = []
+          replace_generic(args+[type]) do |new_args|
+            new_type = new_args.pop
+            a << Class.new(Function) do
               @name = name
-              @arg_types = args.map(&:to_sym)
-              @rtype = type
+              @arg_types = new_args.map(&:to_sym)
+              @rtype = new_type.to_sym
               @code = code
             end
           end
+          a
         else
           Class.new(Function) do
             @name = name
             @arg_types = args.map(&:to_sym)
-            @rtype = type
+            @rtype = type.to_sym
             @code = code
           end
         end

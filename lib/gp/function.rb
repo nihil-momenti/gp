@@ -37,9 +37,9 @@ module GP
         END
       end
 
-      #def inspect
-      #  "#<GP::Function:[#{ @name }:#{ @arg_types.join(',') }->#{ @rtype }=>#{ @code }]>"
-      #end
+      def inspect
+        "#<GP::Function:[#{ @name }:#{ @arg_types.join(',') }->#{ @rtype }=>#{ @code }]>"
+      end
     end
   end
 end
