@@ -1,46 +1,46 @@
+class Array
+  alias choice sample 
+end
+
 module GP
   class Algorithm
     attr_reader :functions, :aconstants, :variables, :return_type, :root
     def initialize generation_type, depth
       case generation_type
       when :grow
-        @root = __grow__ depth, environment.return_type
+        @root = __grow__ depth, $environment.return_type
       when :full
-        @root = __full__ depth, environment.return_type
+        @root = __full__ depth, $environment.return_type
       else
         @root = depth
       end
+    end
 
-      eval <<-END
-        class << self
-          def call vars
-            #{ @root.to_s }
-          end
-        end
-      END
+    def call vars
+      eval @root.to_s
     end
 
     def variables type=nil
       if type != nil
-        environment.variables.select{ |var| var.rtype == type }
+        $environment.variables.select{ |var| var.rtype == type }
       else
-        environment.variables
+        $environment.variables
       end
     end
 
     def functions type=nil
       if type != nil
-        environment.functions.select{ |func| func.rtype == type }
+        $environment.functions.select{ |func| func.rtype == type }
       else
-        environment.functions
+        $environment.functions
       end
     end
 
     def aconstants type=nil
       if type != nil
-        environment.aconstants.select{ |const| const.rtype == type }
+        $environment.aconstants.select{ |const| const.rtype == type }
       else
-        environment.aconstants
+        $environment.aconstants
       end
     end
 
@@ -106,29 +106,25 @@ module GP
         to_replace = random_node
         replacement = other.random_node(to_replace.rtype)
       end
-      self.class.new(nil, @root.dup_with_replacement(to_replace, replacement))
+      Algorithm.new(nil, @root.dup_with_replacement(to_replace, replacement))
     end
 
     def mutate
       to_replace = random_node
       replacement = self.class.new(:grow, to_replace.max_height).root
-      self.class.new(nil, @root.dup_with_replacement(to_replace, replacement))
+      Algorithm.new(nil, @root.dup_with_replacement(to_replace, replacement))
     end
 
     def simplify
-      self.class.new(nil, @root.simplify)
+      Algorithm.new(nil, @root.simplify)
     end
 
     def score
-      @score ||= environment.fitness_function.call(self)
+      @score ||= $environment.fitness_function.call(self)
     end
 
-    class << self
-      attr_reader :functions, :aconstants, :variables, :return_type
-
-      def inspect
-        "#<GP::Algorithm:[#{@variables.join(',')}->#{return_type}]>"
-      end
+    def self.inspect
+      "#<GP::Algorithm:[#{@variables.join(',')}->#{return_type}]>"
     end
   end
 end

@@ -1,13 +1,20 @@
 module GP
   class Environment
     def initialize args
-      self.class.instance_exec do
-        args.each do |key, value|
-          define_method(key) do
-            value
-          end
-        end
-      end
+      @args = args
+    end
+
+    def build
+      Population.new
+    end
+
+    def method_missing method, *args, &blk
+      return @args[method] if @args.include? method
+      super
+    end
+
+    def respond_to? method
+      return @args.include? method
     end
   end
 end

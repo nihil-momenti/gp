@@ -49,12 +49,12 @@ module GP
       instance_exec &blk
     end
 
-    def build
+    def load
       if @return_type == nil or @fitness_function == nil
         raise ArgumentError, "return_type and fitness_function required" 
       end
 
-      environment = Environment.new(
+      $environment = Environment.new(
         :functions => @functions,
         :aconstants => @aconstants,
         :variables => @variables,
@@ -71,8 +71,6 @@ module GP
         :return_type => @return_type,
         :fitness_function => @fitness_function
       )
-
-      return Class.new(Population) { define_method(:environment) { environment } }.new
     end
 
     def parse_file file
@@ -103,27 +101,16 @@ module GP
       s.scan(FORMULA_REGEX).map do |name, args, type, code|
         name = name.to_sym
         args = args.scan(TYPE_REGEX)
-        type = type
         
         if args.any? { |arg| GENERIC_TYPE_REGEX =~ arg }
           a = []
           replace_generic(args+[type]) do |new_args|
             new_type = new_args.pop
-            a << Class.new(Function) do
-              @name = name
-              @arg_types = new_args.map(&:to_sym)
-              @rtype = new_type.to_sym
-              @code = code
-            end
+            a << FunctionDefinition.new(name, new_args.map(&:to_sym), new_type.to_sym, code)
           end
           a
         else
-          Class.new(Function) do
-            @name = name
-            @arg_types = args.map(&:to_sym)
-            @rtype = type.to_sym
-            @code = code
-          end
+          FunctionDefinition.new(name, args.map(&:to_sym), type.to_sym, code)
         end
       end.flatten
     end
@@ -131,10 +118,7 @@ module GP
 
     def parse_constants h
       h.map do |k, v| 
-        Class.new(Constant) do
-          @proc = eval("Proc.new { #{v.value} }")
-          @rtype = k.value.to_sym
-        end
+        ConstantType.new(v.value, k.value.to_sym)
       end
     end
     private :parse_constants
@@ -148,8 +132,8 @@ module GP
 
     class << self
       private :new
-      def build &blk
-        return new(&blk).build
+      def load &blk
+        return new(&blk).load
       end
     end
   end

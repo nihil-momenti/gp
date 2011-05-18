@@ -1,18 +1,45 @@
 require 'gp/node'
 
 module GP
-  class Function < Node
-    def initialize children
-      super
-      @rtype = self.class.rtype
+  class FunctionDefinition
+    attr_reader :rtype, :arg_types, :code
+
+    def initialize name, args, type, code
+      @name = name
+      @arg_types = args
+      @rtype = type
+      @code = code
     end
-        
+
+    def new children
+      Function.new(children, self)
+    end
+
     def to_s
-      @code ||= self.class.code.gsub(/\{\d*\}/) { |s| @children[s.delete('{}').to_i].to_s }
+      <<-END
+#{ @name }: #{ @arg_types.join(', ') } -> #{ @rtype }
+ => #{ @code }
+      END
     end
 
     def inspect
-      @code ||= self.class.code.gsub(/\{\d*\}/) { |s| @children[s.delete('{}').to_i].to_s }
+      "#<GP::FunctionDefinition:[#{ @name }:#{ @arg_types.join(',') }->#{ @rtype }=>#{ @code }]>"
+    end
+  end
+
+  class Function < Node
+    def initialize children, definition
+      super(children)
+      @rtype = definition.rtype
+      @definition = definition
+    end
+        
+    def to_s
+      @code ||= @definition.code.gsub(/\{\d*\}/) { |s| @children[s.delete('{}').to_i].to_s }
+    end
+
+    def inspect
+      @code ||= @definition.code.gsub(/\{\d*\}/) { |s| @children[s.delete('{}').to_i].to_s }
     end
 
     def constant?
@@ -23,23 +50,21 @@ module GP
       if constant?
         Constant.new(eval(self.to_s), self.rtype)
       else
-        self.class.new @children.map { |child| child.simplify }
+        @definition.new @children.map { |child| child.simplify }
       end
     end
 
-    class << self
-      attr_reader :name, :arg_types, :rtype, :code
+    def dup
+      self.class.new @children.map { |child| child.dup }, @definition
+    end
 
-      def to_s
-        <<-END
-#{ @name }: #{ @arg_types.join(', ') } -> #{ @rtype }
- => #{ @code }
-        END
-      end
-
-      def inspect
-        "#<GP::Function:[#{ @name }:#{ @arg_types.join(',') }->#{ @rtype }=>#{ @code }]>"
+    def dup_with_replacement to_replace, replacement
+      if self == to_replace
+        replacement.dup
+      else
+        self.class.new @children.map { |child| child.dup_with_replacement to_replace, replacement }, @definition
       end
     end
+
   end
 end

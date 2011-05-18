@@ -2,26 +2,17 @@ module GP
   class Population
     attr_reader :pop
 
-    def initialize
-      @pop = []
-
-      temp = environment()
-      a = Class.new(Algorithm) { define_method(:environment) { temp } }
-
-      4.times do |x|
-        (environment.pop_size / 8).times do
-          @pop << a.new(:grow, x + 2)
-          @pop << a.new(:full, x + 2)
+    def initialize pop=nil
+      @pop = pop
+      
+      if @pop == nil
+        @pop = []
+        4.times.map do |x|
+          ($environment.pop_size / 8).times do
+            @pop << Algorithm.new(:grow, x + 2)
+            @pop << Algorithm.new(:full, x + 2)
+          end
         end
-      end
-    end
-
-    def test
-      @pop.map do |algo|
-        puts '-----'
-        puts algo
-        puts algo.score
-        puts
       end
     end
 
@@ -31,10 +22,10 @@ module GP
       end / @pop.length
     end
 
-    def highest_score
+    def lowest_score
       @pop.reduce([nil,100000]) do |sum, algo|
         if sum.last > algo.score
-          sum = [algo, algo.score]
+          [algo, algo.score]
         else
           sum
         end
@@ -43,17 +34,16 @@ module GP
 
     # Returns the entire tournament sorted best to worst.
     def tourney
-      (environment.pop_size**0.25).to_i.times.map { @pop.choice }.sort_by { |algo| algo.score }
+      ($environment.pop_size**0.25).to_i.times.map { @pop.choice }.sort_by(&:score)
     end
 
     def succ
       new_pop = []
-      (@pop.length * environment.crossover_rate).to_i.times { a,b = tourney ; new_pop << a.cross(b) }
-      (@pop.length * environment.mutation_rate).to_i.times { a = tourney.first ; new_pop << a.mutate }
-      (@pop.length * environment.reproduction_rate).to_i.times { a = tourney.first ; new_pop << a }
-      (@pop.length * environment.simplification_rate).to_i.times { a = tourney.first ; new_pop << a.simplify }
-      @pop = new_pop
-      self
+      ($environment.pop_size * $environment.crossover_rate).to_i.times { a,b = tourney ; new_pop << a.cross(b) }
+      ($environment.pop_size * $environment.mutation_rate).to_i.times { a = tourney.first ; new_pop << a.mutate }
+      ($environment.pop_size * $environment.reproduction_rate).to_i.times { a = tourney.first ; new_pop << a }
+      ($environment.pop_size * $environment.simplification_rate).to_i.times { a = tourney.first ; new_pop << a.simplify }
+      Population.new(new_pop)
     end
   end
 end

@@ -1,11 +1,32 @@
 require 'gp/node'
 
 module GP
+  class ConstantType
+    attr_reader :proc, :rtype
+
+    def initialize prok, type
+      @proc = prok
+      @rtype = type
+    end
+
+    def new value=nil, rtype=nil
+      if value
+        Constant.new value, @rtype
+      else
+        Constant.new eval(@proc), @rtype
+      end
+    end
+
+    def inspect
+      "#<GP::Constant:[#{@rtype}]>"
+    end
+  end
+
   class Constant < Node
-    def initialize value=nil, rtype=nil
+    def initialize value, rtype
       super()
-      @value = value!=nil ? value : self.class.proc.call
-      @rtype = rtype || self.class.rtype
+      @value = value
+      @rtype = rtype
     end
 
     def constant?
@@ -17,22 +38,14 @@ module GP
     end
     
     def dup
-      self.class.new @value
+      Constant.new @value, @rtype
     end
 
     def dup_with_replacement to_replace, replacement
       if self == to_replace
         replacement.dup
       else
-        self.class.new @value
-      end
-    end
-
-    class << self
-      attr_reader :proc, :rtype
-
-      def inspect
-        "#<GP::Constant:[#{@rtype}]>"
+        Constant.new @value, @rtype
       end
     end
   end

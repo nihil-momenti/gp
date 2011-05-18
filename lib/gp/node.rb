@@ -32,18 +32,6 @@ module GP
       dup
     end
 
-    def dup
-      self.class.new @children.map { |child| child.dup }
-    end
-
-    def dup_with_replacement to_replace, replacement
-      if self == to_replace
-        replacement.dup
-      else
-        self.class.new @children.map { |child| child.dup_with_replacement to_replace, replacement }
-      end
-    end
-
     def random_child
       @children.choice
     end
