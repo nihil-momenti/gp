@@ -9,9 +9,17 @@ class Job
 
   def self.perform job_id
     pop = []
+    pop_list = "jobs:#{job_id}:new_pop"
+    backup_list = "jobs:#{job_id}:backup"
+
+    $redis.del backup_list
+
     # Wait up to 30 seconds between algos being scored
     # If we miss one it will just be part of the next run
-    while (result = $redis.blpop "jobs:#{job_id}:new_pop", 30)
+    # Also backup to a backup list, will need manual resuming
+    # but at least we don't lose everything if a Job dies
+    while (result = $redis.blpop pop_list, 30)
+      $redis.rpush backup_list, result.last
       pop << Marshal.load(result.last)
     end
 

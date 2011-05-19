@@ -39,9 +39,6 @@ module GP
 
     def succ
       new_pop = []
-      @pop.each do |algo|
-        new_pop << algo
-      end
 
       ($environment.pop_size * $environment.crossover_rate).to_i.times { a,b = tourney ; new_pop << a.cross(b) }
       ($environment.pop_size * $environment.mutation_rate).to_i.times { a = tourney.first ; new_pop << a.mutate }

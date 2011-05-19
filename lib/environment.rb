@@ -40,7 +40,7 @@ unless $environment
           algo.call(example) == example[:cover_type] ? 0 : 1
         end.reduce(&:+) + 0.1 * algo.root.avg_height
       rescue
-        $log.log job_id, "Error: #{$!}"
+        $log.log 'ERROR', "Error: #{$!}\nAlgo: #{algo}"
         100000
       end
     }
