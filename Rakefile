@@ -11,7 +11,12 @@ namespace :gp do
   task :start do
     require 'environment'
     job_id = $redis.incr "jobs:counter"
-    Job.new(job_id).save
+    $environment.build.pop.each do |algo|
+      $redis.rpush "jobs:#{job_id}:old_pop", Marshal.dump(algo)
+    end
+    [Resque.workers.size, 1].max.times do
+      Resque.enqueue Part, job_id
+    end
     Resque.enqueue Job, job_id
   end
 

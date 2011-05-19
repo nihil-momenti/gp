@@ -34,11 +34,15 @@ module GP
 
     # Returns the entire tournament sorted best to worst.
     def tourney
-      ($environment.pop_size**0.25).to_i.times.map { @pop.choice }.sort_by(&:score)
+      @pop.sample(($environment.pop_size**0.25).to_i).sort_by(&:score)
     end
 
     def succ
       new_pop = []
+      @pop.each do |algo|
+        new_pop << algo
+      end
+
       ($environment.pop_size * $environment.crossover_rate).to_i.times { a,b = tourney ; new_pop << a.cross(b) }
       ($environment.pop_size * $environment.mutation_rate).to_i.times { a = tourney.first ; new_pop << a.mutate }
       ($environment.pop_size * $environment.reproduction_rate).to_i.times { a = tourney.first ; new_pop << a }
