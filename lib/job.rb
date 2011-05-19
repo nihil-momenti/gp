@@ -6,30 +6,21 @@ require_relative 'part'
 class Job
   @queue = "jobs"
 
-  def self.log job_id, msg
-    File.open("gp.#{job_id}.log", 'a') do |file|
-      file.write <<-END
-        ==== [#{Socket.gethostname}]
-             [#{Process.pid.to_s.rjust(5)}] [#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}]
-             #{msg}
-      END
-    end
-  end
-
 
   def self.perform job_id
     pop = []
-    while pop.size < $environment.pop_size 
-      key, algo = $redis.blpop "jobs:#{job_id}:new_pop", 0
-      pop << Marshal.load(algo)
+    # Wait up to 30 seconds between algos being scored
+    # If we miss one it will just be part of the next run
+    while (result = $redis.blpop "jobs:#{job_id}:new_pop", 30)
+      pop << Marshal.load(result.last)
     end
 
     pop = GP::Population.new(pop)
 
-    log job_id, <<-END
-       Average score: #{pop.average_score}
-       Highest score: #{pop.lowest_score.last}
-       Best algorithm: #{pop.lowest_score.first}
+    $log.log job_id, <<-END
+Average score: #{pop.average_score}
+Highest score: #{pop.lowest_score.last}
+Best algorithm: #{pop.lowest_score.first}
     END
 
     pop.succ.pop.each do |algo|
