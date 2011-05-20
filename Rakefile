@@ -21,12 +21,22 @@ namespace :gp do
   end
 
   namespace :workers do
-    task :setup do
+    task :mastersetup do
       ENV['COUNT'] = `grep -c "processor" /proc/cpuinfo`.strip
       ENV['QUEUE'] = 'parts,jobs'
     end
 
-    task :start => :setup do
+    task :slavesetup do
+      ENV['COUNT'] = `grep -c "processor" /proc/cpuinfo`.strip
+      ENV['QUEUE'] = 'parts'
+    end
+
+    task :masterstart => :mastersetup do
+      puts "Spawning #{ENV['COUNT']} forks"
+      Rake::Task['resque:workers'].invoke
+    end
+
+    task :start => :slavesetup do
       puts "Spawning #{ENV['COUNT']} forks"
       Rake::Task['resque:workers'].invoke
     end
