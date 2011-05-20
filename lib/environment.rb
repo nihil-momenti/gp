@@ -36,7 +36,8 @@ unless $environment
 
     fitness_function proc { |algo|
       begin
-        Assignment::Data::Training.map do |example|
+        # Using 1/3 of the training set to make faster and add more noise to the tournaments
+        Assignment::Data::Training.sample(3780).map do |example|
           algo.call(example) == example[:cover_type] ? 0 : 1
         end.reduce(&:+) + 0.1 * algo.root.avg_height
       rescue

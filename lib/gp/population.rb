@@ -34,7 +34,7 @@ module GP
 
     # Returns the entire tournament sorted best to worst.
     def tourney
-      @pop.sample(($environment.pop_size**0.25).to_i).sort_by(&:score)
+      @pop.sample(($environment.pop_size**0.5).to_i).sort_by(&:score)
     end
 
     def succ
