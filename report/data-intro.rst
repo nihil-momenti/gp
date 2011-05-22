@@ -37,7 +37,6 @@ observations from each cover type (3780 observations total) and the test set was
 the rest of the observations (565 892).
 
 These sets were chosen to match the original study by Blackard and Dean, this
-way the results of this study could easily be compared to that study and the
-relative accuracies could be compared.
+way the results of this study could easily be compared to that study.
 
 .. [original] temp
