@@ -1,5 +1,5 @@
-Genetic Programming [field-guide]_
-----------------------------------
+Genetic Programming [poli08:fieldguide]_
+------------------------------------------
 
 Genetic programming (GP) is a form of evolutionary computation (EC), one of the
 major subsets of machine learning.  One of the major advantages of genetic
@@ -71,4 +71,4 @@ randomly generated subtree.  To try and keep a semi-consistent size the
 generated subtree is kept to approximately the same height as the removed
 subtree.
 
-.. [field-guide] temp
+.. [poli08:fieldguide] temp

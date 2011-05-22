@@ -4,7 +4,7 @@ Dataset
 The dataset used came from the US Forest Service inventory information and
 information derived from standard digital spatial data processed in a geographic
 information system as gathered by Jock A. Blackard and Denis J. Dean
-[original]_.
+[Blackard1999131]_.
 
 The classification variable is the forest cover type, this is one of seven
 mutually exclusive classes.  The cover type maps were created by the US Forest
@@ -39,4 +39,4 @@ the rest of the observations (565 892).
 These sets were chosen to match the original study by Blackard and Dean, this
 way the results of this study could easily be compared to that study.
 
-.. [original] temp
+.. [Blackard1999131] temp

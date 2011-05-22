@@ -79,11 +79,11 @@ height.
 
 Once the environment has been set-up using the ``Builder`` the initial
 population has to be produced.  This is achieved using a technique called
-*ramped half-and-half* [koza]_.  This is a technique where algorithms are
+*ramped half-and-half* [koza:book]_.  This is a technique where algorithms are
 generated using half *grow* and half *full* with the maximum algorithm height
 being slowly increased as the population is created.  This is in order to create
 an initial population with a variety of algorithm sizes and shapes.
 
 
 
-.. [koza] temp
+.. [koza:book] temp
