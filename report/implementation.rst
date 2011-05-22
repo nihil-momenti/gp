@@ -17,12 +17,24 @@ specific language (DSL) to allow them to be programmaticly defined at startup.
 This will then be saved into an environment variable that will be added to the
 required classes via meta-programing.
 
-The individual algorithms will be stored as a tree, to run the code this tree
-can be flattened by each node containing a representation of the basic code for
-the node, this representation will then have each child node be substituted in
-recursively down the tree till just a single string representing the function is
-returned.  This string can then simply be eval-ed by Ruby and the output checked
-against the fitness function.
+The individual algorithms will be stored as a tree, with each node containing a
+representation of the basic code for the node.  To run the algorithm the tree
+can be flattened by with each node's textual representation having the children
+nodes substituted in recursively till just a single string representing the
+function is returned.  This string can then simply be eval-ed by Ruby and the
+output checked against the fitness function.
+
+The population can be stored as a simple array of the individuals contained,
+Ruby array's come with a ``sample`` method that will easily allow a random
+subset of the population to be gathered for use in a tournament.
+
+Algorithms will also have support for the basic operations such as *mutation*
+and *crossover* added.  Another operation yet to be described that will be
+supported is *simplification*, this will take an existing algorithm and simplify
+any constant parts of the algorithm.  The random mutation and crossover
+regularly creates bits of code like ``if (false) then (1 - (4 * 8)) else (4 + (9
+- ((12 - 6) / 6))) end``, this can very easily be simplified down to just
+``12``.
 
 Solution
 --------
@@ -60,4 +72,18 @@ a set of functions.  So this ``IF`` function takes in a ``Boolean`` argument,
 then 2 arguments of the same type and returns a result with the same type as the
 last two arguments.  Again the Ruby code to define this functions is given last.
 
-Once the environment has 
+As well as the definitions the ``Builder`` is responsible for gathering other
+configuration parameters such as; population size,
+crossover/mutation/simplification/reproduction rates and max initial algorithm
+height.
+
+Once the environment has been set-up using the ``Builder`` the initial
+population has to be produced.  This is achieved using a technique called
+*ramped half-and-half* [koza]_.  This is a technique where algorithms are
+generated using half *grow* and half *full* with the maximum algorithm height
+being slowly increased as the population is created.  This is in order to create
+an initial population with a variety of algorithm sizes and shapes.
+
+
+
+.. [koza] temp
