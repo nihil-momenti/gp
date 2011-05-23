@@ -36,7 +36,7 @@ can give you:
     ssh in to each host and then either send `QUIT` (shutdown after finishing
     current job) or `TERM` (kill child and quit now) to all running Resque
     workers.  NOTE: this doesn't try and find only the workers that are working
-    on this, it will attempt to kill and Resque workers on the host.
+    on this, it will attempt to kill any Resque workers on the host.
 
 [COSC401]: http://www.canterbury.ac.nz/courseinfo/GetCourseDetails.aspx?course=COSC401&occurrence=11S1(C)&year=2011
            "The COSC401 information page"
