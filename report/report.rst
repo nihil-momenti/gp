@@ -15,4 +15,5 @@ Predicting forest cover types from cartographic variables via a genetic programm
 .. include:: implementation.rst
 .. include:: results.rst
 .. include:: conclusion.rst
+.. include:: links.rst
 

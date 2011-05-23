@@ -20,3 +20,4 @@ __
 
   Average and best scores against the generations.
   
+In this we can see that the 
