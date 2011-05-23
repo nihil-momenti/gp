@@ -30,6 +30,10 @@ while gets
         puts $_
       end
     end
+  when /\\end\{document\}/
+    puts "\\newpage"
+    puts "~"
+    puts $_
   else
     puts $_
   end

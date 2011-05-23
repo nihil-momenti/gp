@@ -16,8 +16,21 @@ FULLWIDTH
 
 __
 .. figure:: images/score-vs-gen
-  :width: 80%
+  :width: 90%
 
   Average and best scores against the generations.
   
 In this we can see that the 
+
+
+Other statistics that could be interesting is the size of the best algorithm in
+each generation, see `Figure 3`__
+
+FULLWIDTH
+
+__
+.. figure:: images/size-vs-gen
+  :width: 90%
+
+  Algorithm size against the generation.
+

@@ -23,7 +23,7 @@ As stated above, if I had more time I would go back and completely re-write the
 system.  I would probably start with the goal of making it distributed, maybe
 aiming to make it extensible with ideas from geographically distributed GP,
 where instead of just a single population multiple semi-independent
-sub-populations are used and restrictions are placed on the possibilites of
+sub-populations are used and restrictions are placed on the possibilities of
 cross-over between different *demes* [kinnear:DHaeseleer]_ [langdon:book]_.
 
 This distribution would still use Redis backing, the simplicity of a key-value

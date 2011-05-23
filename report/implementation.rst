@@ -13,7 +13,7 @@ via meta-programing.
 
 The first step in the program is the definition of the functions, constants and
 variables.  Instead of hard-coding it was decided to create a simple domain
-specific language (DSL) to allow them to be programmaticly defined at startup.
+specific language (DSL) to allow them to be programmatically defined at startup.
 This will then be saved into an environment variable that will be added to the
 required classes via meta-programing.
 

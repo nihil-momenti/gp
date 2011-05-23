@@ -7,7 +7,12 @@ Predicting forest cover types from cartographic variables via a genetic programm
 :date: 23/05/2011
 
 :abstract: 
-  Blah blah blah.
+  This report details the implementation and testing of a genetic programming
+  algorithm in Ruby with the goal of learning to predict forest cover
+  types from a set of cartographic variables.  The plan for the development is
+  covered, along with the major architectural changes that came about with the
+  issues encountered.  The final results from three populations are an accuracy
+  of ???????????????????.
 
 .. sectnum::
 
@@ -15,5 +20,3 @@ Predicting forest cover types from cartographic variables via a genetic programm
 .. include:: implementation.rst
 .. include:: results.rst
 .. include:: conclusion.rst
-.. include:: links.rst
-
