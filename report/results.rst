@@ -20,11 +20,10 @@ __
 
   Average and best scores against the generations.
   
-In this we can see that the 
-
-
 Other statistics that could be interesting is the size of the best algorithm in
-each generation, see `Figure 3`__
+each generation, see `Figure 3`__.  This shows that the algorithms are getting
+bigger and bigger.  One major upgrade would be allowing simplification to chose
+between true and false branches when the conditional is a constant.
 
 FULLWIDTH
 
@@ -34,3 +33,5 @@ __
 
   Algorithm size against the generation.
 
+The final result from the populations were overall classification accuracies on
+the full test set of around 30%.
