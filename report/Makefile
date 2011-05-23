@@ -2,8 +2,8 @@ images =  $(addsuffix .pdf, $(basename $(wildcard images/*.svg)))
 images += $(addsuffix .pdf, $(basename $(wildcard images/*.eps)))
 
 default: ${images}
-	rst2latex.py report.rst | ./transform.rb | rubber-pipe --pdf > report.pdf
-	open report.pdf
+	rst2latex.py report.rst | ./transform.rb | rubber-pipe --pdf > ../report.pdf
+	open ../report.pdf
 
 images/%.pdf: images/%.svg
 	svg2pdf $< $@
