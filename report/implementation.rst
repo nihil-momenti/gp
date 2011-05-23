@@ -84,6 +84,89 @@ generated using half *grow* and half *full* with the maximum algorithm height
 being slowly increased as the population is created.  This is in order to create
 an initial population with a variety of algorithm sizes and shapes.
 
+Next the population has to be evolved.  This is done in the ``Population``
+class, ``Array#sample`` is used to pick out a tournament of individuals to
+compare.  These are then sorted by their scores and the best one or two as
+required are picked off for the mutation and crossover operations.  This is
+repeated until the new population is at the required size and this is then
+returned.
 
+The actual scoring is done inside the fitness function defined by the user.
+This calls the algorithm with the required variables and compares the result to
+what is expected.  Because of using a series of examples in the fitness function
+this was set-up as a lower is better scoring system.  Each example that was
+incorrectly classified was worth one point, each example that was correctly
+classified zero and the average height of the algorithm's tree was worth 0.1 per
+layer.
+
+Implementation Issues
+---------------------
+
+The biggest issue with this implementation was speed, Ruby is definitely not the
+fastest of languages.  Initially I believed the ease of implementation and
+understandability of the code would out-weigh the speed disadvantage, but after
+seeing how slow it actually is I now think a better method would be to build a
+hybrid C/Ruby system.
+
+The other major issue didn't arise until I attempted to classify the actual
+dataset.  When learning the test set of just ``x^2 + y^2`` the best solution
+would generally be found within 3-7 generations, around 1-3 minutes of
+computation.  After verifying that it was running with the actual test set I
+spawned four separate populations and left them running for a few hours.  Checking
+on them later I was surprised to see them sitting at approximately 60GiB total
+memory usage.  I'm still not sure whether this was a problem with my code, or if
+I had just hit one of the known memory leaks in Ruby.  One issue with using a
+new language with a problematic garbage collector.
+
+Solutions
+---------
+
+The solution to both the above issues was the same: distributed computing.
+There is a really nice background job queueing library called Resque [#]_.  By
+using this with a Redis [#]_ database I could easily distribute the computation
+around a few hundred computers on the university network.
+
+.. [#] https://github.com/defunkt/resque
+.. [#] http://redis.io
+
+This also solves the second problem via Resque's architecture; each worker uses
+a parent-child pair.  The parent simply loads the environment and waits for a
+job, once a job arrives the parent forks a new child that does the processing,
+when the child finishes it exits, freeing up the memory used during the run.
+
+The slowest part of the system was calculating scores for each individual
+algorithm; so the simplest way to distribute the system was to save each
+population into a Redis list, have the workers pull individuals from this list,
+compute their scores and push them into a new list.  Once the old list was empty
+one worker pulls the entire new list in, creates the new generation, and pushes
+the new generation back into the old list.
+
+Because these were University computers I couldn't simply leave them all logged
+in so the system had to be resilient to workers suddenly disappearing when
+others used the computers.  Each individual wasn't very important overall so if
+we lost a few when a worker disappeared this shouldn't affect the system.
+Therefore we could simply have each worker only pulling one individual out of
+the database at a time, then put it back in once scored before pulling the next
+out.  If we lose any then the population size will be built back up when the
+next generation is created.
+
+The biggest problem would be if a worker crashed when creating the new
+generation, at this point the worker has to have the entire population pulled
+out to compare them all.  There were two parts to the reliability here; first,
+the workers that could create the new generation were limited to only those on
+the main computer science server; second, as each individual is pulled out of
+the database a copy is pushed into a backup list.
+
+Keeping the workers on the main server would probably be enough by itself.  This
+is the same server that the Redis database is running on and Redis is a purely
+memory-based database, so if the server were to crash everything would be lost
+anyway.  The backup is more if the worker hits some strange error and gets
+stuck.  If so the backup can be manually copied across into the old population
+list and the job restarted.
+
+The transformation of the system from a single-threaded, single-process system
+into a distributed system was rushed and turned out a big hack, but it worked.
+At its peak I was using approximately 440 workers distributed over around 130
+computers.
 
 .. [koza:book] temp
