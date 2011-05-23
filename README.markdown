@@ -38,5 +38,9 @@ can give you:
     workers.  NOTE: this doesn't try and find only the workers that are working
     on this, it will attempt to kill any Resque workers on the host.
 
+## Results
+
+The generation of the results used in the report can be found in [this gist](https://gist.github.com/985347).
+
 [COSC401]: http://www.canterbury.ac.nz/courseinfo/GetCourseDetails.aspx?course=COSC401&occurrence=11S1(C)&year=2011
            "The COSC401 information page"
